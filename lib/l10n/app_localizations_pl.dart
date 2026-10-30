@@ -6628,4 +6628,289 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get networkMap_unnamed => 'Repeater bez nazwy';
+
+  @override
+  String get testMode_title => 'Test Mode';
+
+  @override
+  String get testMode_settingsSubtitle =>
+      'Send synthetic text packets for routing tests';
+
+  @override
+  String get testMode_requiresFirmware =>
+      'Requires companion firmware 15 or newer';
+
+  @override
+  String get testMode_unavailable =>
+      'This radio does not support test mode. Use companion firmware 15 or newer compiled with ENABLE_TEST_MODE.';
+
+  @override
+  String get testMode_disconnected => 'Connect a radio to configure test mode.';
+
+  @override
+  String get testMode_configuration => 'Configuration';
+
+  @override
+  String get testMode_enabled => 'Test mode';
+
+  @override
+  String get testMode_enabledSubtitle =>
+      'Allow synthetic test packets on the radio';
+
+  @override
+  String get testMode_idSize => 'Short-ID size';
+
+  @override
+  String get testMode_region => 'Region';
+
+  @override
+  String get testMode_regionNone => 'No region (unscoped)';
+
+  @override
+  String get testMode_regionUnknown => 'Unknown region key';
+
+  @override
+  String testMode_regionKey(String key) {
+    return 'Key: $key';
+  }
+
+  @override
+  String get testMode_path => 'Hop path';
+
+  @override
+  String get testMode_pathHint => 'e.g. 12 34 ab cd';
+
+  @override
+  String get testMode_pathFlood => 'Empty path: flood';
+
+  @override
+  String testMode_pathSummary(int hops, int bytes, int width) {
+    return '$hops hops x $width bytes ($bytes bytes)';
+  }
+
+  @override
+  String get testMode_pathErrorInvalidHex => 'Enter whole hex bytes only';
+
+  @override
+  String get testMode_pathErrorTooLong => 'Path must be 64 bytes or fewer';
+
+  @override
+  String get testMode_pathErrorNotDivisible =>
+      'Path length must be a multiple of the short-ID size';
+
+  @override
+  String get testMode_pathErrorTooManyHops =>
+      'Use 62 hops or fewer to leave room for flood routers';
+
+  @override
+  String get testMode_pathClear => 'Clear path';
+
+  @override
+  String get testMode_floodPathTitle => 'Flood routing';
+
+  @override
+  String get testMode_floodPathNote =>
+      'Test packets always flood. The network builds the hop path, so custom or randomized path bytes are not applied.';
+
+  @override
+  String get testMode_randomPath => 'Randomize path';
+
+  @override
+  String get testMode_randomPathSubtitle =>
+      'Randomize the fake path prefix; flood routers append their own hops';
+
+  @override
+  String get testMode_randomMessage => 'Randomize message';
+
+  @override
+  String get testMode_randomMessageSubtitle =>
+      'Generate a new message for each packet';
+
+  @override
+  String get testMode_randomSender => 'Randomize sender name';
+
+  @override
+  String get testMode_randomSenderSubtitle =>
+      'Choose a new sender name for each group packet';
+
+  @override
+  String get testMode_senderName => 'Sender name';
+
+  @override
+  String get testMode_randomMode => 'Random mode';
+
+  @override
+  String get testMode_randomModeSubtitle =>
+      'New message and hop bytes for each packet';
+
+  @override
+  String testMode_randomModePathNote(int hops, int width) {
+    return 'Starts with $hops fake hops x $width bytes; prefix bytes change per packet';
+  }
+
+  @override
+  String get testMode_timestamp => 'Custom timestamp';
+
+  @override
+  String get testMode_timestampSubtitle =>
+      'Use a fixed timestamp instead of the current time';
+
+  @override
+  String get testMode_timestampField => 'Timestamp (epoch seconds)';
+
+  @override
+  String get testMode_timestampInvalid => 'Enter a valid Unix timestamp';
+
+  @override
+  String get testMode_apply => 'Apply settings';
+
+  @override
+  String get testMode_applySuccess => 'Test mode settings applied';
+
+  @override
+  String get testMode_packet => 'Packet';
+
+  @override
+  String get testMode_target => 'Destination';
+
+  @override
+  String get testMode_targetDirect => 'Direct (random keys)';
+
+  @override
+  String get testMode_targetGroup => 'Group channel';
+
+  @override
+  String get testMode_groupChannel => 'Group channel';
+
+  @override
+  String get testMode_groupNoChannels => 'No group channels are configured.';
+
+  @override
+  String get testMode_groupManageChannels => 'Open Channels';
+
+  @override
+  String get testMode_groupSenderRandom =>
+      'A new random sender name is used for every packet.';
+
+  @override
+  String get testMode_groupRequiresFirmware =>
+      'Group test sends need companion firmware version 16 or newer.';
+
+  @override
+  String get testMode_message => 'Message';
+
+  @override
+  String get testMode_messageHint => 'Text to send';
+
+  @override
+  String get testMode_messageRandom => 'Randomised for each packet';
+
+  @override
+  String testMode_messageBytes(int count, int max) {
+    return '$count / $max bytes';
+  }
+
+  @override
+  String testMode_messageTooLong(int max) {
+    return 'Message is longer than $max bytes';
+  }
+
+  @override
+  String get testMode_continuous => 'Continuous mode';
+
+  @override
+  String get testMode_continuousInterval => 'Send interval';
+
+  @override
+  String get testMode_interval250ms => '250 ms';
+
+  @override
+  String get testMode_interval500ms => '500 ms';
+
+  @override
+  String get testMode_continuousSubtitle =>
+      'Fixed interval; retries at the same interval if the radio queue is full';
+
+  @override
+  String get testMode_start => 'Start';
+
+  @override
+  String get testMode_stop => 'Stop';
+
+  @override
+  String get testMode_send => 'Send test packet';
+
+  @override
+  String get testMode_sending => 'Sending...';
+
+  @override
+  String get testMode_sentFlood => 'Sent as flood';
+
+  @override
+  String get testMode_sentDirect => 'Sent as direct';
+
+  @override
+  String get testMode_noAck => 'No ACK expected';
+
+  @override
+  String testMode_estimatedTimeout(int ms) {
+    return 'Estimated timeout $ms ms';
+  }
+
+  @override
+  String testMode_packetCount(int count) {
+    return '$count packets sent';
+  }
+
+  @override
+  String testMode_lastMessage(String message) {
+    return 'Last message: $message';
+  }
+
+  @override
+  String get testMode_recent => 'Recent sends';
+
+  @override
+  String get testMode_airtimeWarning =>
+      'Continuous mode generates constant mesh traffic. Use short runs.';
+
+  @override
+  String get testMode_errorBadState => 'Test mode is disabled on the radio.';
+
+  @override
+  String get testMode_errorQueueFull =>
+      'Radio packet queue is full. Continuous mode stopped to protect the radio; wait a moment, then try again.';
+
+  @override
+  String get testMode_errorIllegalArg =>
+      'The radio rejected the message or path.';
+
+  @override
+  String testMode_errorFirmware(int code) {
+    return 'Radio error $code.';
+  }
+
+  @override
+  String get testMode_errorTimeout => 'The radio did not answer.';
+
+  @override
+  String testMode_errorGeneric(String error) {
+    return 'Test packet failed: $error';
+  }
+
+  @override
+  String get testMode_errorNotConnected => 'Not connected to a radio.';
+
+  @override
+  String get testMode_notSupported =>
+      'This radio\'s firmware does not support test mode.';
+
+  @override
+  String get testMode_enableFirst => 'Enable test mode before sending.';
+
+  @override
+  String get testMode_logFlood => 'Flood';
+
+  @override
+  String get testMode_logDirect => 'Direct';
 }

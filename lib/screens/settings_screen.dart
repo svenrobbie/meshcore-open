@@ -21,6 +21,7 @@ import 'app_debug_log_screen.dart';
 import 'ble_debug_log_screen.dart';
 import '../widgets/radio_stats_entry.dart';
 import 'telemetry_screen.dart';
+import 'test_mode_screen.dart';
 import '../widgets/sync_progress_overlay.dart';
 import 'region_management_screen.dart';
 import '../utils/share_origin.dart';
@@ -757,6 +758,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             );
           },
+        ),
+        const Divider(height: 1, indent: 16),
+        _selectConnector(
+          (c) => (c.supportsTestMode, c.firmwareVerCode),
+          (context, connector) => MeshNavTile(
+            icon: Icons.science_outlined,
+            title: context.l10n.testMode_title,
+            subtitle: connector.supportsTestMode
+                ? context.l10n.testMode_settingsSubtitle
+                : context.l10n.testMode_requiresFirmware,
+            onTap: connector.supportsTestMode
+                ? () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TestModeScreen(),
+                    ),
+                  )
+                : null,
+          ),
         ),
       ],
     );

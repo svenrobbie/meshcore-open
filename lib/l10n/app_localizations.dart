@@ -11046,6 +11046,498 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unnamed repeater'**
   String get networkMap_unnamed;
+
+  /// No description provided for @testMode_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Mode'**
+  String get testMode_title;
+
+  /// No description provided for @testMode_settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send synthetic text packets for routing tests'**
+  String get testMode_settingsSubtitle;
+
+  /// No description provided for @testMode_requiresFirmware.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires companion firmware 15 or newer'**
+  String get testMode_requiresFirmware;
+
+  /// No description provided for @testMode_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This radio does not support test mode. Use companion firmware 15 or newer compiled with ENABLE_TEST_MODE.'**
+  String get testMode_unavailable;
+
+  /// No description provided for @testMode_disconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a radio to configure test mode.'**
+  String get testMode_disconnected;
+
+  /// No description provided for @testMode_configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get testMode_configuration;
+
+  /// No description provided for @testMode_enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Test mode'**
+  String get testMode_enabled;
+
+  /// No description provided for @testMode_enabledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow synthetic test packets on the radio'**
+  String get testMode_enabledSubtitle;
+
+  /// No description provided for @testMode_idSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-ID size'**
+  String get testMode_idSize;
+
+  /// No description provided for @testMode_region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get testMode_region;
+
+  /// No description provided for @testMode_regionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No region (unscoped)'**
+  String get testMode_regionNone;
+
+  /// No description provided for @testMode_regionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown region key'**
+  String get testMode_regionUnknown;
+
+  /// No description provided for @testMode_regionKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Key: {key}'**
+  String testMode_regionKey(String key);
+
+  /// No description provided for @testMode_path.
+  ///
+  /// In en, this message translates to:
+  /// **'Hop path'**
+  String get testMode_path;
+
+  /// No description provided for @testMode_pathHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 12 34 ab cd'**
+  String get testMode_pathHint;
+
+  /// No description provided for @testMode_pathFlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty path: flood'**
+  String get testMode_pathFlood;
+
+  /// No description provided for @testMode_pathSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{hops} hops x {width} bytes ({bytes} bytes)'**
+  String testMode_pathSummary(int hops, int bytes, int width);
+
+  /// No description provided for @testMode_pathErrorInvalidHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter whole hex bytes only'**
+  String get testMode_pathErrorInvalidHex;
+
+  /// No description provided for @testMode_pathErrorTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Path must be 64 bytes or fewer'**
+  String get testMode_pathErrorTooLong;
+
+  /// No description provided for @testMode_pathErrorNotDivisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Path length must be a multiple of the short-ID size'**
+  String get testMode_pathErrorNotDivisible;
+
+  /// No description provided for @testMode_pathErrorTooManyHops.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 62 hops or fewer to leave room for flood routers'**
+  String get testMode_pathErrorTooManyHops;
+
+  /// No description provided for @testMode_pathClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear path'**
+  String get testMode_pathClear;
+
+  /// No description provided for @testMode_floodPathTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flood routing'**
+  String get testMode_floodPathTitle;
+
+  /// No description provided for @testMode_floodPathNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Test packets always flood. The network builds the hop path, so custom or randomized path bytes are not applied.'**
+  String get testMode_floodPathNote;
+
+  /// No description provided for @testMode_randomPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomize path'**
+  String get testMode_randomPath;
+
+  /// No description provided for @testMode_randomPathSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomize the fake path prefix; flood routers append their own hops'**
+  String get testMode_randomPathSubtitle;
+
+  /// No description provided for @testMode_randomMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomize message'**
+  String get testMode_randomMessage;
+
+  /// No description provided for @testMode_randomMessageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a new message for each packet'**
+  String get testMode_randomMessageSubtitle;
+
+  /// No description provided for @testMode_randomSender.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomize sender name'**
+  String get testMode_randomSender;
+
+  /// No description provided for @testMode_randomSenderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new sender name for each group packet'**
+  String get testMode_randomSenderSubtitle;
+
+  /// No description provided for @testMode_senderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender name'**
+  String get testMode_senderName;
+
+  /// No description provided for @testMode_randomMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Random mode'**
+  String get testMode_randomMode;
+
+  /// No description provided for @testMode_randomModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New message and hop bytes for each packet'**
+  String get testMode_randomModeSubtitle;
+
+  /// No description provided for @testMode_randomModePathNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts with {hops} fake hops x {width} bytes; prefix bytes change per packet'**
+  String testMode_randomModePathNote(int hops, int width);
+
+  /// No description provided for @testMode_timestamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom timestamp'**
+  String get testMode_timestamp;
+
+  /// No description provided for @testMode_timestampSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a fixed timestamp instead of the current time'**
+  String get testMode_timestampSubtitle;
+
+  /// No description provided for @testMode_timestampField.
+  ///
+  /// In en, this message translates to:
+  /// **'Timestamp (epoch seconds)'**
+  String get testMode_timestampField;
+
+  /// No description provided for @testMode_timestampInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Unix timestamp'**
+  String get testMode_timestampInvalid;
+
+  /// No description provided for @testMode_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply settings'**
+  String get testMode_apply;
+
+  /// No description provided for @testMode_applySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Test mode settings applied'**
+  String get testMode_applySuccess;
+
+  /// No description provided for @testMode_packet.
+  ///
+  /// In en, this message translates to:
+  /// **'Packet'**
+  String get testMode_packet;
+
+  /// No description provided for @testMode_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get testMode_target;
+
+  /// No description provided for @testMode_targetDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct (random keys)'**
+  String get testMode_targetDirect;
+
+  /// No description provided for @testMode_targetGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group channel'**
+  String get testMode_targetGroup;
+
+  /// No description provided for @testMode_groupChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group channel'**
+  String get testMode_groupChannel;
+
+  /// No description provided for @testMode_groupNoChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'No group channels are configured.'**
+  String get testMode_groupNoChannels;
+
+  /// No description provided for @testMode_groupManageChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Channels'**
+  String get testMode_groupManageChannels;
+
+  /// No description provided for @testMode_groupSenderRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'A new random sender name is used for every packet.'**
+  String get testMode_groupSenderRandom;
+
+  /// No description provided for @testMode_groupRequiresFirmware.
+  ///
+  /// In en, this message translates to:
+  /// **'Group test sends need companion firmware version 16 or newer.'**
+  String get testMode_groupRequiresFirmware;
+
+  /// No description provided for @testMode_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get testMode_message;
+
+  /// No description provided for @testMode_messageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Text to send'**
+  String get testMode_messageHint;
+
+  /// No description provided for @testMode_messageRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomised for each packet'**
+  String get testMode_messageRandom;
+
+  /// No description provided for @testMode_messageBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} / {max} bytes'**
+  String testMode_messageBytes(int count, int max);
+
+  /// No description provided for @testMode_messageTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Message is longer than {max} bytes'**
+  String testMode_messageTooLong(int max);
+
+  /// No description provided for @testMode_continuous.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous mode'**
+  String get testMode_continuous;
+
+  /// No description provided for @testMode_continuousInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Send interval'**
+  String get testMode_continuousInterval;
+
+  /// No description provided for @testMode_interval250ms.
+  ///
+  /// In en, this message translates to:
+  /// **'250 ms'**
+  String get testMode_interval250ms;
+
+  /// No description provided for @testMode_interval500ms.
+  ///
+  /// In en, this message translates to:
+  /// **'500 ms'**
+  String get testMode_interval500ms;
+
+  /// No description provided for @testMode_continuousSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed interval; retries at the same interval if the radio queue is full'**
+  String get testMode_continuousSubtitle;
+
+  /// No description provided for @testMode_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get testMode_start;
+
+  /// No description provided for @testMode_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get testMode_stop;
+
+  /// No description provided for @testMode_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test packet'**
+  String get testMode_send;
+
+  /// No description provided for @testMode_sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get testMode_sending;
+
+  /// No description provided for @testMode_sentFlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent as flood'**
+  String get testMode_sentFlood;
+
+  /// No description provided for @testMode_sentDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent as direct'**
+  String get testMode_sentDirect;
+
+  /// No description provided for @testMode_noAck.
+  ///
+  /// In en, this message translates to:
+  /// **'No ACK expected'**
+  String get testMode_noAck;
+
+  /// No description provided for @testMode_estimatedTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated timeout {ms} ms'**
+  String testMode_estimatedTimeout(int ms);
+
+  /// No description provided for @testMode_packetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} packets sent'**
+  String testMode_packetCount(int count);
+
+  /// No description provided for @testMode_lastMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Last message: {message}'**
+  String testMode_lastMessage(String message);
+
+  /// No description provided for @testMode_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent sends'**
+  String get testMode_recent;
+
+  /// No description provided for @testMode_airtimeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous mode generates constant mesh traffic. Use short runs.'**
+  String get testMode_airtimeWarning;
+
+  /// No description provided for @testMode_errorBadState.
+  ///
+  /// In en, this message translates to:
+  /// **'Test mode is disabled on the radio.'**
+  String get testMode_errorBadState;
+
+  /// No description provided for @testMode_errorQueueFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio packet queue is full. Continuous mode stopped to protect the radio; wait a moment, then try again.'**
+  String get testMode_errorQueueFull;
+
+  /// No description provided for @testMode_errorIllegalArg.
+  ///
+  /// In en, this message translates to:
+  /// **'The radio rejected the message or path.'**
+  String get testMode_errorIllegalArg;
+
+  /// No description provided for @testMode_errorFirmware.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio error {code}.'**
+  String testMode_errorFirmware(int code);
+
+  /// No description provided for @testMode_errorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The radio did not answer.'**
+  String get testMode_errorTimeout;
+
+  /// No description provided for @testMode_errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Test packet failed: {error}'**
+  String testMode_errorGeneric(String error);
+
+  /// No description provided for @testMode_errorNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected to a radio.'**
+  String get testMode_errorNotConnected;
+
+  /// No description provided for @testMode_notSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This radio\'s firmware does not support test mode.'**
+  String get testMode_notSupported;
+
+  /// No description provided for @testMode_enableFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable test mode before sending.'**
+  String get testMode_enableFirst;
+
+  /// No description provided for @testMode_logFlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Flood'**
+  String get testMode_logFlood;
+
+  /// No description provided for @testMode_logDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get testMode_logDirect;
 }
 
 class _AppLocalizationsDelegate

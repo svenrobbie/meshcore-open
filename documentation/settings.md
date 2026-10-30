@@ -214,7 +214,7 @@ Each creates a `.gpx` file and opens the OS share sheet. Feedback via snackbar f
 
 ## Debug
 
-Two log viewers accessible via list tiles:
+Two log viewers and a test-mode entry point accessible via list tiles:
 
 ### BLE Debug Log
 Two views (togglable via segmented button):
@@ -226,6 +226,9 @@ Two views (togglable via segmented button):
 Structured log entries (Info / Warning / Error), with tag, message, and timestamp.
 - Must be enabled first in App Settings → Debug
 - Copy-all and Clear buttons
+
+### Test Mode
+Sends synthetic text packets for routing tests on C6L companion firmware 15+ built with `ENABLE_TEST_MODE`. Configure the short-ID size, region, hop path, random packets, and continuous sending. The tile is disabled on unsupported firmware. See [Test Mode](test-mode.md).
 
 ---
 

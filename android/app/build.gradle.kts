@@ -61,6 +61,16 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            excludes += setOf(
+                "lib/armeabi-v7a/**",
+                "lib/x86/**",
+                "lib/x86_64/**",
+            )
+        }
+    }
+
     signingConfigs {
         create("release") {
             val storeFilePath = keystoreProperties["storeFile"] as String?

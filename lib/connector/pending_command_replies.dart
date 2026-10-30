@@ -72,6 +72,7 @@ int? replyCodeForCommand(Uint8List data) {
     case cmdSetPathHashMode:
     case cmdSendChannelData:
     case cmdSetDefaultFloodScope:
+    case cmdTestSetConfig:
       return respCodeOk;
     case cmdSendTxtMsg:
     case cmdSendLogin:
@@ -79,7 +80,11 @@ int? replyCodeForCommand(Uint8List data) {
     case cmdSendTracePath:
     case cmdSendBinaryReq:
     case cmdSendAnonReq:
+    case cmdTestSendTxt:
+    case cmdTestSendGroupTxt:
       return respCodeSent;
+    case cmdTestGetConfig:
+      return respCodeTestConfig;
     case cmdSendTelemetryReq:
       // The 4-byte 'self' form answers with PUSH_CODE_TELEMETRY_RESPONSE.
       return data.length > 4 ? respCodeSent : null;

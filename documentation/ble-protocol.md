@@ -122,6 +122,10 @@ On unexpected disconnection, auto-reconnect with exponential backoff:
 | 62 | CMD_SEND_CHANNEL_DATA | Send GRP_DATA image chunks (firmware code 11+) |
 | 63 | CMD_SET_DEFAULT_FLOOD_SCOPE | Store the radio's default flood scope: `[63][name 31, NUL padded][key 16]`, or `[63]` to clear (firmware code 11+) |
 | 64 | CMD_GET_DEFAULT_FLOOD_SCOPE | Read the radio's default flood scope (firmware code 11+) |
+| 67 | CMD_TEST_SET_CONFIG | Store the RAM-only test configuration: `[67][enabled][hash_size][path_byte_len][region_key 16][path bytes]` (C6L companion firmware code 15+ with `ENABLE_TEST_MODE`) |
+| 68 | CMD_TEST_GET_CONFIG | Read the test configuration, answered by `RESP_CODE_TEST_CONFIG` (code 15+) |
+| 69 | CMD_TEST_SEND_TXT | Send one synthetic text packet: `[69][timestamp x4 LE][text]`, answered by `RESP_CODE_SENT` with ACK hash 0 (code 15+) |
+| 70 | CMD_TEST_SEND_GROUP_TXT | Send synthetic group text: `[70][channel_idx][timestamp x4 LE][sender_len][sender UTF-8][text UTF-8]`, answered by `RESP_CODE_SENT` with ACK hash 0 (code 16+) |
 
 ## Response / Push Codes (Device → App)
 
@@ -149,6 +153,7 @@ On unexpected disconnection, auto-reconnect with exponential backoff:
 | 25 | RESP_CODE_AUTO_ADD_CONFIG | Auto-add flags |
 | 27 | RESP_CODE_CHANNEL_DATA_RECV | Received GRP_DATA image chunk |
 | 28 | RESP_CODE_DEFAULT_FLOOD_SCOPE | `[28][name 31][key 16]`, or `[28]` alone when no default is set |
+| 30 | RESP_CODE_TEST_CONFIG | `[30][enabled][hash_size][path_byte_len][region_key 16][path bytes]` (C6L test mode, firmware code 15+) |
 | 0x80 | PUSH_CODE_ADVERT | Known contact re-seen |
 | 0x81 | PUSH_CODE_PATH_UPDATED | Better path found; carries the 32-byte public key of the updated contact |
 | 0x82 | PUSH_CODE_SEND_CONFIRMED | Delivery ACK from remote; carries ACK hash (4 bytes) + trip time (4 bytes) |

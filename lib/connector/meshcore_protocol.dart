@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/widgets.dart';
 
+import '../models/test_mode_config.dart';
+
 // Buffer Reader - sequential binary data reader with pointer tracking
 class BufferReader {
   int _pointer = 0;
@@ -216,6 +218,10 @@ const int cmdGetAllowedRepeatFreq = 60;
 const int cmdSetPathHashMode = 61;
 const int cmdSetDefaultFloodScope = 63; // FIRMWARE_VER_CODE 11+
 const int cmdGetDefaultFloodScope = 64; // FIRMWARE_VER_CODE 11+
+const int cmdTestSetConfig = 67; // FIRMWARE_VER_CODE 15+ (C6L companion)
+const int cmdTestGetConfig = 68; // FIRMWARE_VER_CODE 15+ (C6L companion)
+const int cmdTestSendTxt = 69; // FIRMWARE_VER_CODE 15+ (C6L companion)
+const int cmdTestSendGroupTxt = 70; // FIRMWARE_VER_CODE 16+ (C6L companion)
 
 // Text message types
 const int txtTypePlain = 0;
@@ -267,6 +273,7 @@ const int respCodeAutoAddConfig = 25;
 const int respCodeAllowedRepeatFreq = 26;
 const int respCodeStats = 24;
 const int respCodeDefaultFloodScope = 28;
+const int respCodeTestConfig = 30; // FIRMWARE_VER_CODE 15+ (C6L companion)
 
 /// Region name field width in SET/GET_DEFAULT_FLOOD_SCOPE frames (NUL padded,
 /// so at most 30 name bytes).
@@ -1237,6 +1244,167 @@ Uint8List buildSetDefaultFloodScopeFrame(String region) {
     name: name,
     key: Uint8List.fromList(
       frame.sublist(keyStart, keyStart + floodScopeKeySize),
+    ),
+  );
+}
+
+// Build CMD_TEST_SET_CONFIG (firmware ver code 15+, C6L companion builds).
+// Format: [cmd][enabled][hash_size][path_byte_len][region_key x16][path...]
+Uint8List buildTestSetConfigFrame(TestModeConfig config) {
+  if (config.hashSize < testModeHashSizeMin ||
+      config.hashSize > testModeHashSizeMax) {
+    throw ArgumentError.value(
+      config.hashSize,
+      'hashSize',
+      'must be 1, 2 or 3 bytes',
+    );
+  }
+  if (config.pathBytes.length > testModeMaxPathBytes) {
+    throw ArgumentError.value(
+      config.pathBytes.length,
+      'pathBytes',
+      'must be at most $testModeMaxPathBytes bytes',
+    );
+  }
+  if (config.pathBytes.length % config.hashSize != 0) {
+    throw ArgumentError.value(
+      config.pathBytes.length,
+      'pathBytes',
+      'must be divisible by hashSize',
+    );
+  }
+  if (config.hopCount > testModeMaxHops) {
+    throw ArgumentError.value(
+      config.hopCount,
+      'pathBytes',
+      'must be at most $testModeMaxHops hops',
+    );
+  }
+  if (config.regionKey.length != testModeRegionKeySize) {
+    throw ArgumentError.value(
+      config.regionKey.length,
+      'regionKey',
+      'must be $testModeRegionKeySize bytes',
+    );
+  }
+
+  final writer = BufferWriter();
+  writer.writeByte(cmdTestSetConfig);
+  writer.writeByte(config.enabled ? 1 : 0);
+  writer.writeByte(config.hashSize);
+  writer.writeByte(config.pathBytes.length);
+  writer.writeBytes(config.regionKey);
+  writer.writeBytes(config.pathBytes);
+  return writer.toBytes();
+}
+
+// Build CMD_TEST_GET_CONFIG (firmware ver code 15+, C6L companion builds).
+Uint8List buildTestGetConfigFrame() {
+  return Uint8List.fromList([cmdTestGetConfig]);
+}
+
+// Build CMD_TEST_SEND_TXT (firmware ver code 15+, C6L companion builds).
+// Format: [cmd][timestamp x4 LE][utf8 text...]
+Uint8List buildTestSendTxtFrame(String text, {int? timestampSeconds}) {
+  final textBytes = utf8.encode(text);
+  if (textBytes.length > testModeMaxTextBytes) {
+    throw ArgumentError.value(
+      textBytes.length,
+      'text',
+      'must be at most $testModeMaxTextBytes UTF-8 bytes',
+    );
+  }
+  final timestamp =
+      timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+  if (timestamp < 0 || timestamp > 0xFFFFFFFF) {
+    throw ArgumentError.value(
+      timestamp,
+      'timestampSeconds',
+      'must fit in an unsigned 32-bit integer',
+    );
+  }
+
+  final writer = BufferWriter();
+  writer.writeByte(cmdTestSendTxt);
+  writer.writeUInt32LE(timestamp);
+  writer.writeBytes(Uint8List.fromList(textBytes));
+  return writer.toBytes();
+}
+
+/// CMD_TEST_SEND_GROUP_TXT: [channel_idx][timestamp x4 LE][sender_len]
+/// [sender UTF-8][text UTF-8]. Group text carries a display name instead of a
+/// sender public key.
+Uint8List buildTestSendGroupTxtFrame({
+  required int channelIndex,
+  required String senderName,
+  required String text,
+  int? timestampSeconds,
+}) {
+  if (channelIndex < 0 || channelIndex > 0xFF) {
+    throw ArgumentError.value(channelIndex, 'channelIndex');
+  }
+  final senderBytes = utf8.encode(senderName);
+  final textBytes = utf8.encode(text);
+  if (senderBytes.isEmpty || senderBytes.length > 31) {
+    throw ArgumentError.value(
+      senderBytes.length,
+      'senderName',
+      'must be between 1 and 31 UTF-8 bytes',
+    );
+  }
+  if (senderBytes.length + 2 + textBytes.length > testModeMaxTextBytes) {
+    throw ArgumentError.value(
+      textBytes.length,
+      'text',
+      'sender name and text must fit in $testModeMaxTextBytes bytes',
+    );
+  }
+
+  final timestamp =
+      timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+  if (timestamp < 0 || timestamp > 0xFFFFFFFF) {
+    throw ArgumentError.value(
+      timestamp,
+      'timestampSeconds',
+      'must fit in an unsigned 32-bit integer',
+    );
+  }
+
+  final writer = BufferWriter();
+  writer.writeByte(cmdTestSendGroupTxt);
+  writer.writeByte(channelIndex);
+  writer.writeUInt32LE(timestamp);
+  writer.writeByte(senderBytes.length);
+  writer.writeBytes(Uint8List.fromList(senderBytes));
+  writer.writeBytes(Uint8List.fromList(textBytes));
+  return writer.toBytes();
+}
+
+/// Parses RESP_CODE_TEST_CONFIG. Returns null when the frame is not a test
+/// configuration reply or does not contain a valid configuration.
+TestModeConfig? parseTestConfigFrame(Uint8List frame) {
+  if (frame.isEmpty || frame[0] != respCodeTestConfig) return null;
+  if (frame.length < 4 + testModeRegionKeySize) return null;
+  final hashSize = frame[2];
+  final pathByteLength = frame[3];
+  if (hashSize < testModeHashSizeMin || hashSize > testModeHashSizeMax) {
+    return null;
+  }
+  if (pathByteLength > testModeMaxPathBytes ||
+      frame.length < 4 + testModeRegionKeySize + pathByteLength) {
+    return null;
+  }
+  if (pathByteLength % hashSize != 0 ||
+      pathByteLength ~/ hashSize > testModeMaxHops) {
+    return null;
+  }
+  final pathStart = 4 + testModeRegionKeySize;
+  return TestModeConfig(
+    enabled: frame[1] != 0,
+    hashSize: hashSize,
+    regionKey: Uint8List.fromList(frame.sublist(4, pathStart)),
+    pathBytes: Uint8List.fromList(
+      frame.sublist(pathStart, pathStart + pathByteLength),
     ),
   );
 }

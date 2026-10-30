@@ -15,6 +15,7 @@ import '../models/companion_radio_stats.dart';
 import '../models/contact.dart';
 import '../models/message.dart';
 import '../models/path_selection.dart';
+import '../models/test_mode_config.dart';
 import '../models/translation_support.dart';
 import '../helpers/reaction_helper.dart';
 import '../helpers/channel_resend_coverage.dart';
@@ -234,6 +235,9 @@ class MeshCoreConnector extends ChangeNotifier {
   final PendingCommandReplies _pendingGenericAckQueue = PendingCommandReplies(
     staleAfter: _commandAckTimeout * 2,
   );
+  Completer<TestModeConfig?>? _pendingTestConfig;
+  Completer<TestSendResult>? _pendingTestSend;
+  TestModeConfig? _lastTestModeConfig;
   static const String _reactionSendQueuePrefix = '__reaction_send__';
   // TXT_TYPE_CLI_COMMAND (firmware TxtDataHelpers.h).
   static const int _txtTypeCliCommand = 3;
@@ -715,6 +719,16 @@ class MeshCoreConnector extends ChangeNotifier {
   /// CMD_SET_FLOOD_SCOPE `[54,1]` (send unscoped, overriding the radio's
   /// default scope) exists from ver code 12.
   bool get supportsExplicitUnscopedFlood => (_firmwareVerCode ?? 0) >= 12;
+
+  /// CMD_TEST_SET/GET_CONFIG and CMD_TEST_SEND_TXT exist from ver code 15 on
+  /// companion builds compiled with ENABLE_TEST_MODE (M5Stack Unit C6L).
+  bool get supportsTestMode => (_firmwareVerCode ?? 0) >= 15;
+
+  /// Group test sends were added in firmware version code 16.
+  bool get supportsTestGroupMode => (_firmwareVerCode ?? 0) >= 16;
+
+  /// Last test-mode configuration read from or written to the radio.
+  TestModeConfig? get lastTestModeConfig => _lastTestModeConfig;
 
   /// Name of the radio's default flood scope, or null when none is set.
   String? get defaultFloodScopeName => _defaultFloodScopeName;
@@ -3966,6 +3980,112 @@ class MeshCoreConnector extends ChangeNotifier {
     }
   }
 
+  /// Reads the radio's RAM-only test-mode configuration.
+  ///
+  /// Returns null when the firmware does not support test mode, rejects the
+  /// request with an error, or does not answer in time.
+  Future<TestModeConfig?> getTestModeConfig({
+    Duration timeout = const Duration(seconds: 3),
+  }) async {
+    if (!isConnected || !supportsTestMode) return null;
+    final inFlight = _pendingTestConfig;
+    if (inFlight != null) return inFlight.future;
+
+    final completer = Completer<TestModeConfig?>();
+    _pendingTestConfig = completer;
+    try {
+      try {
+        await sendFrame(buildTestGetConfigFrame(), waitForGenericAck: true);
+      } on TimeoutException {
+        return null;
+      } on FirmwareCommandException {
+        return null;
+      }
+      return await completer.future.timeout(timeout, onTimeout: () => null);
+    } finally {
+      if (identical(_pendingTestConfig, completer)) {
+        _pendingTestConfig = null;
+      }
+    }
+  }
+
+  /// Writes the RAM-only test-mode configuration and waits for the radio to
+  /// accept it. Throws [FirmwareCommandException] when the firmware rejects it
+  /// and [TimeoutException] when it does not answer.
+  Future<void> setTestModeConfig(TestModeConfig config) async {
+    if (!isConnected) throw StateError('Not connected');
+    if (!supportsTestMode) {
+      throw UnsupportedError('Firmware does not support test mode');
+    }
+    await sendFrame(buildTestSetConfigFrame(config), waitForGenericAck: true);
+    _lastTestModeConfig = config;
+    notifyListeners();
+  }
+
+  /// Sends one synthetic test packet and returns the flood flag and estimated
+  /// timeout from the normal `RESP_CODE_SENT` reply.
+  ///
+  /// The firmware gives every test packet a fresh random sender and receiver
+  /// keypair, so no app-side identity handling is needed. Test packets never
+  /// expect an ACK; the reply's ACK hash is always 0.
+  Future<TestSendResult> sendTestText(
+    String text, {
+    int? timestampSeconds,
+  }) async {
+    if (!isConnected) throw StateError('Not connected');
+    if (!supportsTestMode) {
+      throw UnsupportedError('Firmware does not support test mode');
+    }
+    return _sendTestFrame(
+      buildTestSendTxtFrame(text, timestampSeconds: timestampSeconds),
+    );
+  }
+
+  /// Sends a synthetic group text packet through the selected local channel.
+  /// Group messages carry a display name instead of a sender public key.
+  Future<TestSendResult> sendTestGroupText({
+    required int channelIndex,
+    required String senderName,
+    required String text,
+    int? timestampSeconds,
+  }) async {
+    if (!isConnected) throw StateError('Not connected');
+    if (!supportsTestGroupMode) {
+      throw UnsupportedError('Firmware does not support group test sends');
+    }
+    return _sendTestFrame(
+      buildTestSendGroupTxtFrame(
+        channelIndex: channelIndex,
+        senderName: senderName,
+        text: text,
+        timestampSeconds: timestampSeconds,
+      ),
+    );
+  }
+
+  Future<TestSendResult> _sendTestFrame(Uint8List frame) async {
+    if (_pendingTestSend != null) {
+      throw StateError('A test packet is already being sent');
+    }
+
+    final completer = Completer<TestSendResult>();
+    _pendingTestSend = completer;
+    // A disconnect can fail the completer before sendTestText awaits it.
+    completer.future.ignore();
+    try {
+      await sendFrame(frame, waitForGenericAck: true);
+      return await completer.future.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () =>
+            throw TimeoutException('No confirmation for the test packet'),
+      );
+    } finally {
+      if (identical(_pendingTestSend, completer)) {
+        _pendingTestSend = null;
+      }
+    }
+  }
+
   Future<void> requestBatteryStatus({bool force = false}) async {
     if (!isConnected) return;
     if (_batteryRequested && !force) return;
@@ -6156,6 +6276,9 @@ class MeshCoreConnector extends ChangeNotifier {
         _defaultFloodScopeKey = scope?.key;
         notifyListeners();
         break;
+      case respCodeTestConfig:
+        _handleTestConfig(frame);
+        break;
       case respCodeEndOfContacts:
         debugPrint('Got END_OF_CONTACTS');
         _isLoadingContacts = false;
@@ -7818,6 +7941,19 @@ class MeshCoreConnector extends ChangeNotifier {
     }
   }
 
+  void _handleTestConfig(Uint8List frame) {
+    final config = parseTestConfigFrame(frame);
+    final pending = _pendingTestConfig;
+    _pendingTestConfig = null;
+    if (config != null) {
+      _lastTestModeConfig = config;
+      notifyListeners();
+    }
+    if (pending != null && !pending.isCompleted) {
+      pending.complete(config);
+    }
+  }
+
   void _handleMessageSent(Uint8List frame) {
     // Frame format from C++:
     // [0] = RESP_CODE_SENT
@@ -7830,6 +7966,23 @@ class MeshCoreConnector extends ChangeNotifier {
       reader.skipBytes(2); //Skip code and is_flood
       final ackHash = reader.readUInt32LE();
       final timeoutMs = reader.readUInt32LE();
+
+      // Test packets always answer with ACK hash 0. Consume that reply before
+      // retry/repeater routing so it cannot be credited to a normal message.
+      if (ackHash == 0 && _pendingTestSend != null) {
+        final pending = _pendingTestSend!;
+        _pendingTestSend = null;
+        if (!pending.isCompleted) {
+          pending.complete(
+            TestSendResult(
+              flood: frame[1] != 0,
+              estimatedTimeoutMs: timeoutMs,
+              expectedAckHash: ackHash,
+            ),
+          );
+        }
+        return;
+      }
 
       if (_handleRepeaterCommandSent(ackHash, timeoutMs)) {
         return;
@@ -8870,6 +9023,19 @@ class MeshCoreConnector extends ChangeNotifier {
     _resetSyncProgressState();
     _pendingChannelSentQueue.clear();
     _pendingGenericAckQueue.clear();
+    final pendingTestConfig = _pendingTestConfig;
+    _pendingTestConfig = null;
+    if (pendingTestConfig != null && !pendingTestConfig.isCompleted) {
+      pendingTestConfig.complete(null);
+    }
+    final pendingTestSend = _pendingTestSend;
+    _pendingTestSend = null;
+    if (pendingTestSend != null && !pendingTestSend.isCompleted) {
+      pendingTestSend.completeError(
+        StateError('Disconnected while sending a test packet'),
+      );
+    }
+    _lastTestModeConfig = null;
     _reactionSendQueueSequence = 0;
     _retryService?.failAllPending();
   }

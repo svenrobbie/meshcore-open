@@ -38,6 +38,13 @@ class ReviewRadio {
   // Default flood scope (CMD_SET/GET_DEFAULT_FLOOD_SCOPE): name field + key.
   Uint8List? _defaultFloodScope;
 
+  // Test mode (CMD_TEST_*): RAM-only, like the firmware. Resets only when the
+  // simulated radio is recreated.
+  bool _testModeEnabled = false;
+  int _testHashSize = 1;
+  Uint8List _testPath = Uint8List(0);
+  final Uint8List _testRegionKey = Uint8List(floodScopeKeySize);
+
   final StreamController<Uint8List> _controller =
       StreamController<Uint8List>.broadcast();
   final List<Uint8List> _outbox = [];
@@ -273,6 +280,20 @@ class ReviewRadio {
             ? Uint8List.fromList(frame.sublist(1))
             : null;
         _emit([ReviewFrames.ok()]);
+        break;
+      case cmdTestGetConfig when firmwareVerCode < 15:
+      case cmdTestSetConfig when firmwareVerCode < 15:
+      case cmdTestSendTxt when firmwareVerCode < 15:
+        _emit([ReviewFrames.err()]);
+        break;
+      case cmdTestGetConfig:
+        _emit([_testConfigFrame()]);
+        break;
+      case cmdTestSetConfig:
+        _handleTestSetConfig(frame);
+        break;
+      case cmdTestSendTxt:
+        _handleTestSendText(frame);
         break;
       case cmdGetStats:
         _emit([
@@ -588,6 +609,69 @@ class ReviewRadio {
       );
       _emit([ReviewFrames.msgWaiting()]);
     });
+  }
+
+  Uint8List _testConfigFrame() {
+    final writer = BufferWriter();
+    writer.writeByte(respCodeTestConfig);
+    writer.writeByte(_testModeEnabled ? 1 : 0);
+    writer.writeByte(_testHashSize);
+    writer.writeByte(_testPath.length);
+    writer.writeBytes(_testRegionKey);
+    writer.writeBytes(_testPath);
+    return writer.toBytes();
+  }
+
+  void _handleTestSetConfig(Uint8List frame) {
+    // [cmd][enabled][hash_size][path_byte_len][region_key x16][path...]
+    if (frame.length < 4 + floodScopeKeySize) {
+      _emit([ReviewFrames.err(6)]);
+      return;
+    }
+    final enabled = frame[1];
+    final hashSize = frame[2];
+    final pathByteLength = frame[3];
+    if (enabled > 1 ||
+        hashSize < 1 ||
+        hashSize > 3 ||
+        pathByteLength > 64 ||
+        pathByteLength % hashSize != 0 ||
+        pathByteLength ~/ hashSize > 63 ||
+        frame.length < 4 + floodScopeKeySize + pathByteLength) {
+      _emit([ReviewFrames.err(6)]);
+      return;
+    }
+    _testModeEnabled = enabled != 0;
+    _testHashSize = hashSize;
+    _testPath = Uint8List.fromList(
+      frame.sublist(
+        4 + floodScopeKeySize,
+        4 + floodScopeKeySize + pathByteLength,
+      ),
+    );
+    _testRegionKey.setAll(0, frame.sublist(4, 4 + floodScopeKeySize));
+    _emit([ReviewFrames.ok()]);
+  }
+
+  void _handleTestSendText(Uint8List frame) {
+    // [cmd][timestamp x4][text...]
+    if (!_testModeEnabled) {
+      _emit([ReviewFrames.err(4)]);
+      return;
+    }
+    if (frame.length < 5 || frame.length - 5 > 160) {
+      _emit([ReviewFrames.err(6)]);
+      return;
+    }
+    final flood = _testPath.isEmpty;
+    final hops = _testHashSize == 0 ? 0 : _testPath.length ~/ _testHashSize;
+    _emit([
+      ReviewFrames.sent(
+        flood: flood,
+        ackHash: 0,
+        timeoutMs: flood ? 8000 : 1000 + 250 * hops,
+      ),
+    ]);
   }
 
   _Contact? _contactByPrefix(List<int> prefix) {
